@@ -1,0 +1,121 @@
+Sub Stocks()
+
+    'Set the deminsions
+    Dim ws As Worksheet
+    Dim last_row As Long, i As Long
+    Dim open_price As Double
+    Dim close_price As Double
+    Dim quaterly_change As Double
+    Dim ticker As String
+    Dim percent_change As Double
+    Dim volume As Double
+    Dim row As Long
+    Dim quaterly_change_last_row As Long
+     
+    ' Set the column and row headers
+    For Each ws In ActiveWorkbook.Worksheets
+        ws.Cells(1, 9).Value = "Ticker"
+        ws.Cells(1, 10).Value = "Quaterly Change"
+        ws.Cells(1, 11).Value = "Percent Change"
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+        ws.Cells(2, 15).Value = "Greatest % Increase"
+        ws.Cells(3, 15).Value = "Greatest % Decrease"
+        ws.Cells(4, 15).Value = "Greatest Total Volume"
+    
+      last_row = ws.Cells(ws.Rows.Count, 1).End(xlUp).row
+      
+        volume = 0
+        row = 2
+         maxIncrease = -99999999
+         maxDecrease = 99999999
+         maxVolume = -99999999
+    
+        ' Set initial price
+        open_price = ws.Cells(2, 3).Value
+        
+        ' Create a for loop iterating through all quarter sheets
+        For i = 2 To last_row
+            If ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+                ticker = ws.Cells(i, 1).Value
+                ws.Cells(i, 1 + 8).Value = ticker
+                
+                close_price = ws.Cells(i, 5).Value
+                quaterly_change = close_price - open_price
+                ws.Cells(i, 1 + 8).Value = quaterly_chage
+                
+                
+                percent_change = quaterly_change / open_price
+                ws.Cells(i, 1 + 9).Value = percent_change
+                ws.Cells(i, 1 + 9).NumberFormat = "0.00%"
+                
+                volume = volume + ws.Cells(i, 7).Value
+                ws.Cells(i, 1 + 11).Value = volume
+        
+            ' Move to the next row
+                row = row + 1
+                
+            ' Reset open price and volume for next ticker
+                open_price = ws.Cells(2, 3).Value
+                
+                volume = 0
+                
+            Else
+                volume = volume + ws.Cells(i, 7).Value
+                
+            End If
+            
+        Next i
+        
+        quaterly_change_last_row = ws.Cells(ws.Rows.Count, 10).End(xlUp).row
+        
+            ' Set the color index for the change values
+           For i = 2 To quaterly_change_last_row
+            If ws.Cells(i, 10).Value > 0 Then
+                ws.Cells(i, 10).Interior.ColorIndex = 4 'Bright Green
+            ElseIf ws.Cells(i, 10).Value = 0 Then
+                ws.Cells(i, 10).Interior.ColorIndex = 2 'White
+            Else
+                ws.Cells(i, 10).Interior.ColorIndex = 3 'Red
+            End If
+        Next i
+        
+        ' Set the headers
+        ws.Cells(1, 16).Value = "Ticker"
+        ws.Cells(1, 17).Value = "Value"
+        ws.Cells(2, 15).Value = "Greatest % Increase"
+        ws.Cells(3, 15).Value = "Greatest % Decrease"
+        ws.Cells(4, 15).Value = "Greatest Total Volume"
+   
+    lastRow = ws.Cells(ws.Rows.Count, 11).End(xlUp).row
+    
+    ' Calculate the stock greatest increase, decrease and volume
+    For i = 2 To lastRow
+        If ws.Cells(i, 11).Value > maxIncrease Then
+            maxIncrease = ws.Cells(i, 11).Value
+            maxIncreaseTicker = ws.Cells(i, 9).Value
+            
+        End If
+        If ws.Cells(i, 11).Value < maxDecrease Then
+            maxDecrease = ws.Cells(i, 11).Value
+            maxDecreaseTicker = ws.Cells(i, 9).Value
+            
+        End If
+        If ws.Cells(i, 12).Value > maxVolume Then
+            maxVolume = ws.Cells(i, 12).Value
+            maxVolumeTicker = ws.Cells(i, 9).Value
+            
+        End If
+       ws.Cells(4, 16).Value = Application.WorksheetFunction.Max(ws.Range("L2:L" & quaterly_change_last_row))
+       
+    Next i
+
+    ws.Cells(2, 16).Value = maxIncreaseTicker
+    ws.Cells(3, 16).Value = maxDecreaseTicker
+    ws.Cells(4, 16).Value = maxVolumeTicker
+    
+    ws.Range("I:Q").Font.Bold = True
+    ws.Range("I:Q").EntireColumn.AutoFit
+    
+    Next ws
+    
+End Sub
